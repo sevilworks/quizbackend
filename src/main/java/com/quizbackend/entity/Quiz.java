@@ -1,4 +1,7 @@
 package com.quizbackend.entity;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -38,9 +41,11 @@ public class Quiz {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "professor_id", insertable = false, updatable = false)
+    @JsonBackReference // Prevent recursion Professor → Quiz → Professor ...
     private Professor professor;
 
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference // Parent side of Quiz → Question
     private List<Question> questions = new ArrayList<>();
 
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)

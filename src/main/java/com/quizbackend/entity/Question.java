@@ -1,4 +1,7 @@
 package com.quizbackend.entity;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,9 +32,11 @@ public class Question {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id", insertable = false, updatable = false)
+    @JsonBackReference // Child side of Quiz → Question
     private Quiz quiz;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference // Parent side of Question → Response
     private List<Response> responses = new ArrayList<>();
 
     @PrePersist

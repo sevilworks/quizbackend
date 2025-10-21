@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "professors")
 @Data
@@ -40,5 +42,6 @@ public class Professor extends User {
     private Subscription subscription;
 
     @OneToMany(mappedBy = "professor", cascade = CascadeType.ALL)
+    @JsonManagedReference 
     private List<Quiz> quizzes = new ArrayList<>();
 }

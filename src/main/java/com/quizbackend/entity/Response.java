@@ -1,6 +1,9 @@
 package com.quizbackend.entity;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
@@ -9,29 +12,31 @@ import java.time.LocalDateTime;
 @Table(name = "responses")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Response {
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @Column(name = "question_id", nullable = false)
+    
+    @Column(name = "question_id")
     private Integer questionId;
-
-    @Column(name = "response_text", columnDefinition = "TEXT", nullable = false)
+    
+    @Column(name = "response_text", columnDefinition = "TEXT")
     private String responseText;
-
-    @Column(name = "is_correct", nullable = false)
+    
+    @JsonProperty("isCorrect")
+    @Column(name = "is_correct")
     private Boolean isCorrect;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
+    
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", insertable = false, updatable = false)
+    @JsonBackReference // Child side of Question → Response
     private Question question;
-
+    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
