@@ -32,6 +32,7 @@ public class Participation {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"participations", "questions", "professor"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id", insertable = false, updatable = false)
     private Quiz quiz;

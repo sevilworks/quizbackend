@@ -22,6 +22,7 @@ public class Response {
     @Column(name = "question_id")
     private Integer questionId;
     
+    @JsonProperty("response_text")
     @Column(name = "response_text", columnDefinition = "TEXT")
     private String responseText;
     

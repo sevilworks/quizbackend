@@ -48,6 +48,7 @@ public class Quiz {
     @JsonManagedReference // Parent side of Quiz → Question
     private List<Question> questions = new ArrayList<>();
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
     private List<Participation> participations = new ArrayList<>();
 

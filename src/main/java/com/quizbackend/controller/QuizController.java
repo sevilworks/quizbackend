@@ -32,15 +32,15 @@ public class QuizController {
 
     // Helper method to get professor ID from username
     private Integer getProfessorId(String username) {
-        // First get the user
-        Integer userId = authService.getCurrentUser(username).getId();
-        // Then get the professor using the user ID
-        
-        
-        /*Professor professor = professorService.getProfessorById(userId);
-        return professor.getId();*/
-        Professor professor = professorService.getProfessorByUsername(username);
-        return professor.getUserId();
+        try {
+            Professor professor = professorService.getProfessorByUsername(username);
+            if (professor == null) {
+                throw new RuntimeException("Professor not found for username: " + username);
+            }
+            return professor.getUserId();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get professor ID: " + e.getMessage());
+        }
     }
 
     // Professor endpoints
@@ -146,6 +146,21 @@ public ResponseEntity<?> addQuestion(@PathVariable Integer quizId, @RequestBody 
             return quizService.getQuizByCode(code)
                     .map(quiz -> ResponseEntity.ok(quiz))
                     .orElse(ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/join/{code}")
+    public ResponseEntity<?> participateByCode(@PathVariable String code, Authentication authentication) {
+        try {
+            Integer userId = null;
+            if (authentication != null) {
+                String username = authentication.getName();
+                userId = authService.getCurrentUser(username).getId();
+            }
+            Participation participation = quizService.registerParticipationByCode(code, userId, null);
+            return ResponseEntity.ok(participation);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

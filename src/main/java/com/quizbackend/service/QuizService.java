@@ -130,6 +130,27 @@ public class QuizService {
         return participationRepository.save(participation);
     }
 
+    public Participation registerParticipationByCode(String code, Integer userId, Integer guestId) {
+        Quiz quiz = quizRepository.findByCode(code)
+                .orElseThrow(() -> new RuntimeException("Quiz not found"));
+        Integer quizId = quiz.getId();
+
+        if (userId != null && participationRepository.existsByQuizIdAndUserId(quizId, userId)) {
+            throw new RuntimeException("User has already participated in this quiz");
+        }
+        if (guestId != null && participationRepository.existsByQuizIdAndGuestId(quizId, guestId)) {
+            throw new RuntimeException("Guest has already participated in this quiz");
+        }
+
+        Participation participation = new Participation();
+        participation.setQuizId(quizId);
+        participation.setUserId(userId);
+        participation.setGuestId(guestId);
+        participation.setScore(java.math.BigDecimal.ZERO);
+
+        return participationRepository.save(participation);
+    }
+
     public List<Participation> getQuizParticipations(Integer quizId, Integer professorId) {
         Quiz quiz = getQuizById(quizId);
         
