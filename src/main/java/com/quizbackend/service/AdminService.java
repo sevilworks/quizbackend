@@ -22,12 +22,7 @@ public class AdminService {
 
     public Admin createAdmin(User user, String firstName, String lastName) {
         Admin admin = new Admin();
-        admin.setId(user.getId());
-        admin.setUsername(user.getUsername());
-        admin.setEmail(user.getEmail());
-        admin.setPassword(user.getPassword());
-        admin.setRole(user.getRole());
-        admin.setCreatedAt(user.getCreatedAt());
+        admin.setUserId(user.getId());
         admin.setFirstName(firstName);
         admin.setLastName(lastName);
         

@@ -47,11 +47,11 @@ echo -e "\n3. Testing Professor Registration..."
 PROF_RESPONSE=$(curl -s -X POST "$BASE_URL/auth/register/professor" \
   -H "Content-Type: application/json" \
   -d '{
-    "username":"prof2",
-    "email":"prof2@test.com",
-    "password":"password123",
-    "firstName":"John",
-    "lastName":"Doe"
+    "username":"prof1",
+    "email":"prof15@test.com",
+    "password":"passtest1",
+    "first_name":"John",
+    "last_name":"Doe"
   }')
 
 echo "Professor Registration Response: $PROF_RESPONSE"
@@ -61,11 +61,11 @@ echo -e "\n4. Testing Student Registration..."
 STUDENT_RESPONSE=$(curl -s -X POST "$BASE_URL/auth/register/student" \
   -H "Content-Type: application/json" \
   -d '{
-    "username":"student2",
-    "email":"student2@test.com",
-    "password":"password123",
-    "firstName":"Jane",
-    "lastName":"Smith"
+    "username":"student1",
+    "email":"student1@test.com",
+    "password":"password1",
+    "first_name":"Jane",
+    "last_name":"Smith"
   }')
 
 echo "Student Registration Response: $STUDENT_RESPONSE"
@@ -74,7 +74,7 @@ echo "Student Registration Response: $STUDENT_RESPONSE"
 echo -e "\n5. Testing Professor Login..."
 PROF_LOGIN_RESPONSE=$(curl -s -X POST "$BASE_URL/auth/login" \
   -H "Content-Type: application/json" \
-  -d '{"username":"prof2","password":"password123"}')
+  -d '{"username":"prof1","password":"passtest1"}')
 
 echo "Professor Login Response: $PROF_LOGIN_RESPONSE"
 

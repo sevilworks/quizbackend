@@ -4,6 +4,8 @@ import com.quizbackend.entity.Student;
 import com.quizbackend.entity.User;
 import com.quizbackend.repository.StudentRepository;
 import com.quizbackend.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +16,8 @@ import java.util.List;
 @Transactional
 public class StudentService {
 
+    private static final Logger logger = LoggerFactory.getLogger(StudentService.class);
+
     @Autowired
     private StudentRepository studentRepository;
 
@@ -21,18 +25,16 @@ public class StudentService {
     private UserRepository userRepository;
 
     public Student createStudent(User user, String firstName, String lastName) {
+        logger.info("Creating Student entity for userId={}, firstName={}, lastName={}", user.getId(), firstName, lastName);
+
         Student student = new Student();
-        student.setId(user.getId());
         student.setUserId(user.getId());
-        student.setUsername(user.getUsername());
-        student.setEmail(user.getEmail());
-        student.setPassword(user.getPassword());
-        student.setRole(user.getRole());
-        student.setCreatedAt(user.getCreatedAt());
         student.setFirstName(firstName);
         student.setLastName(lastName);
         
-        return studentRepository.save(student);
+        Student saved = studentRepository.save(student);
+        logger.info("Saved Student: {}", saved);
+        return saved;
     }
 
     public Student getStudentById(Integer id) {

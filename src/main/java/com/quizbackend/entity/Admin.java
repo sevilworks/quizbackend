@@ -3,19 +3,17 @@ package com.quizbackend.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "admins")
 @Data
-@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Admin extends User {
+public class Admin {
 
-    @Column(name = "user_id", insertable = false, updatable = false)
+    @Id
+    @Column(name = "user_id")
     private Integer userId;
 
     @Column(name = "first_name")

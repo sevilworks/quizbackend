@@ -1,11 +1,16 @@
 package com.quizbackend.controller;
 
 import com.quizbackend.entity.User;
+import com.quizbackend.entity.Student;
+import com.quizbackend.entity.Professor;
 import com.quizbackend.service.AuthService;
 import com.quizbackend.service.ProfessorService;
 import com.quizbackend.service.StudentService;
 import com.quizbackend.service.AdminService;
 import com.quizbackend.security.JwtUtil;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +21,8 @@ import java.util.Map;
 @RequestMapping("/auth")
 @CrossOrigin(origins = "*")
 public class AuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired
     private AuthService authService;
@@ -35,9 +42,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
+            logger.info("Login attempt for username={}", request.getUsername());
             Map<String, Object> response = authService.login(request.getUsername(), request.getPassword());
+            logger.info("Login successful for username={}", request.getUsername());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            logger.warn("Login failed for username={}: {}", request.getUsername(), e.getMessage());
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -45,6 +55,9 @@ public class AuthController {
     @PostMapping("/register/student")
     public ResponseEntity<?> registerStudent(@RequestBody StudentRegisterRequest request) {
         try {
+            logger.info("RegisterStudent request received: username={}, email={}, firstName={}, lastName={}",
+                    request.getUsername(), request.getEmail(), request.getFirstName(), request.getLastName());
+
             User user = authService.register(
                 request.getUsername(),
                 request.getEmail(),
@@ -53,11 +66,14 @@ public class AuthController {
                 request.getFirstName(),
                 request.getLastName()
             );
-            
-            studentService.createStudent(user, request.getFirstName(), request.getLastName());
-            
+            logger.info("User entity created: id={}, username={}, role={}", user.getId(), user.getUsername(), user.getRole());
+
+            Student student = studentService.createStudent(user, request.getFirstName(), request.getLastName());
+            logger.info("Student entity saved: {}", student);
+
             return ResponseEntity.ok(Map.of("message", "Student registered successfully", "userId", user.getId()));
         } catch (Exception e) {
+            logger.error("Error registering student: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -65,6 +81,9 @@ public class AuthController {
     @PostMapping("/register/professor")
     public ResponseEntity<?> registerProfessor(@RequestBody ProfessorRegisterRequest request) {
         try {
+            logger.info("RegisterProfessor request received: username={}, email={}, firstName={}, lastName={}",
+                    request.getUsername(), request.getEmail(), request.getFirstName(), request.getLastName());
+
             User user = authService.register(
                 request.getUsername(),
                 request.getEmail(),
@@ -73,11 +92,14 @@ public class AuthController {
                 request.getFirstName(),
                 request.getLastName()
             );
-            
-            professorService.createProfessor(user, request.getFirstName(), request.getLastName());
-            
+            logger.info("User entity created: id={}, username={}, role={}", user.getId(), user.getUsername(), user.getRole());
+
+            Professor professor = professorService.createProfessor(user, request.getFirstName(), request.getLastName());
+            logger.info("Professor entity saved: {}", professor);
+
             return ResponseEntity.ok(Map.of("message", "Professor registered successfully", "userId", user.getId()));
         } catch (Exception e) {
+            logger.error("Error registering professor: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -115,7 +137,11 @@ public class AuthController {
         private String username;
         private String email;
         private String password;
+        
+        @JsonProperty("first_name")
         private String firstName;
+        
+        @JsonProperty("last_name")
         private String lastName;
 
         public String getUsername() { return username; }
@@ -134,7 +160,11 @@ public class AuthController {
         private String username;
         private String email;
         private String password;
+        
+        @JsonProperty("first_name")
         private String firstName;
+        
+        @JsonProperty("last_name")
         private String lastName;
 
         public String getUsername() { return username; }

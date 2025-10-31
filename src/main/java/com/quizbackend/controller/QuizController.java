@@ -40,7 +40,7 @@ public class QuizController {
         /*Professor professor = professorService.getProfessorById(userId);
         return professor.getId();*/
         Professor professor = professorService.getProfessorByUsername(username);
-        return professor.getId();
+        return professor.getUserId();
     }
 
     // Professor endpoints

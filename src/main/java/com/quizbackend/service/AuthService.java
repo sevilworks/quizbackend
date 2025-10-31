@@ -3,6 +3,8 @@ package com.quizbackend.service;
 import com.quizbackend.entity.User;
 import com.quizbackend.repository.UserRepository;
 import com.quizbackend.security.JwtUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,8 @@ import java.util.Optional;
 
 @Service
 public class AuthService {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -27,6 +31,7 @@ public class AuthService {
         Optional<User> userOpt = userRepository.findByUsername(username);
         
         if (userOpt.isEmpty() || !passwordEncoder.matches(password, userOpt.get().getPassword())) {
+            logger.warn("Invalid login attempt for username={}", username);
             throw new RuntimeException("Invalid username or password");
         }
 
@@ -38,14 +43,20 @@ public class AuthService {
         response.put("user", user);
         response.put("role", user.getRole().name());
 
+        logger.info("User logged in: username={}, role={}", user.getUsername(), user.getRole());
+
         return response;
     }
 
     public User register(String username, String email, String password, User.Role role, String firstName, String lastName) {
+        logger.info("Registering user: username={}, email={}, role={}, firstName={}, lastName={}", username, email, role, firstName, lastName);
+
         if (userRepository.existsByUsername(username)) {
+            logger.warn("Username already exists: {}", username);
             throw new RuntimeException("Username already exists");
         }
         if (userRepository.existsByEmail(email)) {
+            logger.warn("Email already exists: {}", email);
             throw new RuntimeException("Email already exists");
         }
 
@@ -56,6 +67,8 @@ public class AuthService {
         user.setRole(role);
 
         User savedUser = userRepository.save(user);
+
+        logger.info("User saved to DB: id={}, username={}", savedUser.getId(), savedUser.getUsername());
 
         // Create specific user type based on role
         switch (role) {

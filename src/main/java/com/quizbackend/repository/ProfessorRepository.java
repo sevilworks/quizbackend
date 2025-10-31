@@ -10,5 +10,4 @@ import java.util.Optional;
 @Repository
 public interface ProfessorRepository extends JpaRepository<Professor, Integer> {
     List<Professor> findBySubscriptionId(Integer subscriptionId);
-    Optional<Professor> findByUsername(String username);
 }

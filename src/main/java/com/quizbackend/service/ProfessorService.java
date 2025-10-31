@@ -29,13 +29,7 @@ public class ProfessorService {
 
     public Professor createProfessor(User user, String firstName, String lastName) {
         Professor professor = new Professor();
-        professor.setId(user.getId());
         professor.setUserId(user.getId());
-        professor.setUsername(user.getUsername());
-        professor.setEmail(user.getEmail());
-        professor.setPassword(user.getPassword());
-        professor.setRole(user.getRole());
-        professor.setCreatedAt(user.getCreatedAt());
         professor.setFirstName(firstName);
         professor.setLastName(lastName);
         
@@ -83,7 +77,10 @@ public class ProfessorService {
         return professorRepository.findBySubscriptionId(subscriptionId);
     }
     public Professor getProfessorByUsername(String username) {
-    return professorRepository.findByUsername(username)
-        .orElseThrow(() -> new RuntimeException("Professor not found"));
-}
+        // Find user first, then find professor by user ID
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        return professorRepository.findById(user.getId())
+            .orElseThrow(() -> new RuntimeException("Professor not found"));
+    }
 }
