@@ -47,7 +47,10 @@ public class AdminController {
     public ResponseEntity<?> getAllStudents() {
         try {
             List<Student> students = studentService.getAllStudents();
-            return ResponseEntity.ok(students);
+            List<com.quizbackend.dto.StudentDto> dtos = students.stream()
+                .map(com.quizbackend.dto.StudentDto::fromEntity)
+                .toList();
+            return ResponseEntity.ok(dtos);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -156,16 +159,17 @@ public class AdminController {
 
     // Request DTOs
     public static class SubscriptionRequest {
-        private String name;
-        private java.math.BigDecimal price;
-        private Integer durationDays;
+    private String name;
+    private java.math.BigDecimal price;
+    @com.fasterxml.jackson.annotation.JsonProperty("duration_days")
+    private Integer durationDays;
 
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public java.math.BigDecimal getPrice() { return price; }
-        public void setPrice(java.math.BigDecimal price) { this.price = price; }
-        public Integer getDurationDays() { return durationDays; }
-        public void setDurationDays(Integer durationDays) { this.durationDays = durationDays; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public java.math.BigDecimal getPrice() { return price; }
+    public void setPrice(java.math.BigDecimal price) { this.price = price; }
+    public Integer getDurationDays() { return durationDays; }
+    public void setDurationDays(Integer durationDays) { this.durationDays = durationDays; }
     }
 
     public static class AssignSubscriptionRequest {

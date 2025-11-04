@@ -5,13 +5,16 @@ import com.quizbackend.entity.Question;
 import com.quizbackend.entity.Response;
 import com.quizbackend.entity.Participation;
 import com.quizbackend.entity.Professor;
+import com.quizbackend.entity.User;
 import com.quizbackend.service.QuizService;
+import com.quizbackend.dto.ParticipationDto;
 import com.quizbackend.service.AuthService;
 import com.quizbackend.service.ProfessorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import java.util.stream.Collectors;
 
 import java.util.List;
 import java.util.Map;
@@ -133,7 +136,28 @@ public ResponseEntity<?> addQuestion(@PathVariable Integer quizId, @RequestBody 
             Integer professorId = getProfessorId(username);
             
             List<Participation> participations = quizService.getQuizParticipations(quizId, professorId);
-            return ResponseEntity.ok(participations);
+            // Map to DTOs to avoid returning JPA entities (prevents Hibernate proxy serialization issues)
+            java.util.List<ParticipationDto> dtos = new java.util.ArrayList<>();
+            for (Participation p : participations) {
+                ParticipationDto dto = new ParticipationDto();
+                dto.setId(p.getId());
+                dto.setScore(p.getScore());
+                dto.setCreatedAt(p.getCreatedAt());
+                dto.setUserId(p.getUserId());
+                dto.setGuestId(p.getGuestId());
+                // fetch quiz summary via service to avoid lazy-loading proxies
+                Quiz q = quizService.getQuizById(p.getQuizId());
+                if (q != null) {
+                    ParticipationDto.QuizSummary qs = new ParticipationDto.QuizSummary();
+                    qs.setId(q.getId());
+                    qs.setTitle(q.getTitle());
+                    qs.setCode(q.getCode());
+                    dto.setQuiz(qs);
+                }
+                dtos.add(dto);
+            }
+
+            return ResponseEntity.ok(dtos);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -160,7 +184,22 @@ public ResponseEntity<?> addQuestion(@PathVariable Integer quizId, @RequestBody 
                 userId = authService.getCurrentUser(username).getId();
             }
             Participation participation = quizService.registerParticipationByCode(code, userId, null);
-            return ResponseEntity.ok(participation);
+            // Map to DTO
+            ParticipationDto dto = new ParticipationDto();
+            dto.setId(participation.getId());
+            dto.setScore(participation.getScore());
+            dto.setCreatedAt(participation.getCreatedAt());
+            dto.setUserId(participation.getUserId());
+            dto.setGuestId(participation.getGuestId());
+            Quiz q = quizService.getQuizById(participation.getQuizId());
+            if (q != null) {
+                ParticipationDto.QuizSummary qs = new ParticipationDto.QuizSummary();
+                qs.setId(q.getId());
+                qs.setTitle(q.getTitle());
+                qs.setCode(q.getCode());
+                dto.setQuiz(qs);
+            }
+            return ResponseEntity.ok(dto);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -176,7 +215,22 @@ public ResponseEntity<?> addQuestion(@PathVariable Integer quizId, @RequestBody 
             }
             
             Participation participation = quizService.submitQuizAnswers(quizId, request.getSelectedResponseIds(), userId, request.getGuestId());
-            return ResponseEntity.ok(participation);
+            // Map to DTO
+            ParticipationDto dto = new ParticipationDto();
+            dto.setId(participation.getId());
+            dto.setScore(participation.getScore());
+            dto.setCreatedAt(participation.getCreatedAt());
+            dto.setUserId(participation.getUserId());
+            dto.setGuestId(participation.getGuestId());
+            Quiz q = quizService.getQuizById(participation.getQuizId());
+            if (q != null) {
+                ParticipationDto.QuizSummary qs = new ParticipationDto.QuizSummary();
+                qs.setId(q.getId());
+                qs.setTitle(q.getTitle());
+                qs.setCode(q.getCode());
+                dto.setQuiz(qs);
+            }
+            return ResponseEntity.ok(dto);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -197,10 +251,26 @@ public ResponseEntity<?> addQuestion(@PathVariable Integer quizId, @RequestBody 
     public ResponseEntity<?> getMyParticipations(Authentication authentication) {
         try {
             String username = authentication.getName();
-            Integer userId = authService.getCurrentUser(username).getId();
-            
-            List<Participation> participations = quizService.getUserParticipations(userId);
-            return ResponseEntity.ok(participations);
+            User user = authService.getCurrentUser(username);
+            List<Participation> participations = quizService.getUserParticipations(user.getId());
+            List<ParticipationDto> dtos = participations.stream().map(p -> {
+                ParticipationDto dto = new ParticipationDto();
+                dto.setId(p.getId());
+                dto.setScore(p.getScore());
+                dto.setCreatedAt(p.getCreatedAt());
+                dto.setUserId(p.getUserId());
+                dto.setGuestId(p.getGuestId());
+                Quiz q = quizService.getQuizById(p.getQuizId());
+                if (q != null) {
+                    ParticipationDto.QuizSummary qs = new ParticipationDto.QuizSummary();
+                    qs.setId(q.getId());
+                    qs.setTitle(q.getTitle());
+                    qs.setCode(q.getCode());
+                    dto.setQuiz(qs);
+                }
+                return dto;
+            }).collect(Collectors.toList());
+            return ResponseEntity.ok(dtos);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
